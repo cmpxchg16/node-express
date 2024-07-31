@@ -1,0 +1,29 @@
+"on":
+  push:
+    branches:
+    - main
+name: Deploy to node-express
+jobs:
+  porter-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set Github tag
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    - name: Setup porter
+      uses: porter-dev/setup-porter@v0.1.0
+    - name: Deploy stack
+      timeout-minutes: 30
+      run: exec porter apply
+      env:
+        PORTER_CLUSTER: "4158"
+        PORTER_DEPLOYMENT_TARGET_ID: d2f34d44-4d2b-4ffd-b128-772db97dcb6b
+        PORTER_HOST: https://dashboard.porter.run
+        PORTER_PR_NUMBER: ${{ github.event.number }}
+        PORTER_PROJECT: "13266"
+        PORTER_REPO_NAME: ${{ github.event.repository.name }}
+        PORTER_STACK_NAME: node-express
+        PORTER_TAG: ${{ steps.vars.outputs.sha_short }}
+        PORTER_TOKEN: ${{ secrets.PORTER_STACK_13266_4158 }}
